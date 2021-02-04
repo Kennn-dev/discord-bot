@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const { Client } = require("discord.js");
+const { Client, MessageEmbed } = require("discord.js");
 const ytdl = require("ytdl-core");
 const yts = require("yt-search");
 const client = new Client();
@@ -32,9 +32,16 @@ client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
   commands(client, ["pl", "playlist"], (msg) => {
-    msg.channel.send(
-      "https://www.youtube.com/playlist?list=PLWGW_g1LMUQfTNInrMxtIPUWnKW4V0raT&fbclid=IwAR29VHg5Y159wRU45qRwgBHMk1hTht90AKfmzvzdOZ0trAt7KaWIA7pc-9I"
-    );
+    const mess = new MessageEmbed();
+    mess
+      .setColor("#e594b5")
+      .setTitle("Playlist link ")
+      .setDescription(
+        "https://www.youtube.com/playlist?list=PLWGW_g1LMUQfTNInrMxtIPUWnKW4V0raT&fbclid=IwAR29VHg5Y159wRU45qRwgBHMk1hTht90AKfmzvzdOZ0trAt7KaWIA7pc-9I"
+      )
+      .setFooter("Bot written by Ken 🔥");
+
+    msg.channel.send(mess);
   });
 
   commands(client, ["p", "play"], async (message) => {
@@ -91,6 +98,13 @@ client.on("ready", () => {
   });
 });
 
+client.on("guildMemberAdd", (member) => {
+  const welcomeChannel = member.guild.channels.cache.get("806767655439695873");
+  const welcomeMsg = `Chào mừng <@${member.id}> ! Bạn vừa phí thêm một phần lớn thời gian cuộc đời vào cái server này 🤦‍♂️`;
+
+  welcomeChannel.send(welcomeMsg);
+});
+
 client.on("message", (msg) => {
   if (msg.content === "hello") {
     msg.reply("Lô con cặc !!!");
@@ -103,7 +117,7 @@ client.on("message", (msg) => {
       const navChannel = msg.guild.channels.cache
         .get("562357669063557282")
         .toString();
-      msg.channel.send(`Cút lên ${navChannel} mà gọi nhạc `);
+      msg.channel.send(`Cút lên ${navChannel} mà gọi nhạc 😡`);
     }
   }
 });
