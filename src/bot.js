@@ -1,47 +1,52 @@
 require("dotenv").config();
-
+const { MongoClient } = require("mongodb");
 const { Client, MessageEmbed } = require("discord.js");
 const ytdl = require("ytdl-core");
 const yts = require("yt-search");
 const client = new Client();
+
 const servers = [];
 //if the server doesn't have a set prefix yet
 // let defaultPrefix = '$kk';
 
 const commands = require("./commands");
-const listSongs = [];
 
-function play(connection, message) {
-  var server = servers[message.guild.id];
-
-  server.dispatcher = connection.play(
-    ytdl(server.queue[0], { filter: "audio" })
-  );
-
-  server.dispatcher.on("finish", function () {
-    server.queue.shift();
-    if (server.queue[0]) {
-      play(connection, message);
-    } else {
-      connection.disconnect();
-    }
-  });
-}
+const mongoClient = new MongoClient(process.env.MONGODB_URI, {
+  useUnifiedTopology: true,
+  useNewUrlParser: true,
+  connectTimeoutMS: 30000,
+  keepAlive: 1,
+});
 
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
-  commands(client, ["pl", "playlist"], (msg) => {
+  commands(client, ["l", "list"], (msg) => {
     const mess = new MessageEmbed();
-    mess
-      .setColor("#e594b5")
-      .setTitle("Playlist link ")
-      .setDescription(
-        "https://www.youtube.com/playlist?list=PLWGW_g1LMUQfTNInrMxtIPUWnKW4V0raT&fbclid=IwAR29VHg5Y159wRU45qRwgBHMk1hTht90AKfmzvzdOZ0trAt7KaWIA7pc-9I"
-      )
-      .setFooter("Bot written by Ken 🔥");
+    // if (err) throw err;
+    mongoClient.connect((err, db) => {
+      if (err) msg.channel.send(err);
+      const dbo = db.db("discordDB");
+      dbo
+        .collection("playlist")
+        .find({})
+        .toArray(function (err, result) {
+          if (err) throw err;
 
-    msg.channel.send(mess);
+          const des = result
+            .map((i, index) => `${index + 1} - **${i.name}** : ${i.url}`)
+            .join("\n");
+          // console.log(des);
+          mess
+            .setColor("#fa7de5")
+            .setTitle("Your Playlists")
+            .setDescription(des)
+            .setFooter("Bot written by Ken 🔥");
+          msg.channel.send(mess);
+
+          db.close();
+        });
+    });
   });
 
   commands(client, ["p", "play"], async (message) => {
@@ -95,6 +100,42 @@ client.on("ready", () => {
   commands(client, ["leave"], (msg) => {
     const { voice } = msg.member;
     voice.channel.leave();
+  });
+
+  commands(client, ["add", "a"], (msg) => {
+    const name = msg.content.split(" ")[1];
+    const url = msg.content.split(" ")[2];
+    if (name && url) {
+      const mess = new MessageEmbed();
+      mongoClient.connect((err, db) => {
+        if (err) msg.channel.send(err);
+        const dbo = db.db("discordDB");
+        const newData = { name, url };
+        dbo.collection("playlist").insertOne(newData, (err, res) => {
+          if (err) throw err;
+          mess
+            .setColor("#e594b5")
+            .setTitle("Playlist added")
+            .addFields([
+              { name: "Name ", value: name, inline: true },
+              { name: "Link ", value: url, inline: true },
+            ])
+            .setFooter("Bot written by Ken 🔥");
+          msg.channel.send(mess);
+
+          db.close();
+        });
+      });
+    } else {
+      const mess = new MessageEmbed();
+      mess
+        .setColor("#f5211d")
+        .setTitle("Missing args 😠 ")
+        .setDescription("`!kadd <playlist name> <url>`")
+        .setFooter("Bot written by Ken 🔥");
+
+      msg.channel.send(mess);
+    }
   });
 });
 
