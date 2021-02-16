@@ -20,34 +20,75 @@ const mongoClient = new MongoClient(process.env.MONGODB_URI, {
 
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
-  mongoClient.connect((err) => {
+  mongoClient.connect((err, db) => {
     if (err) console.log(err);
-    mongoClient.close();
-  });
-  commands(client, ["l", "list"], (msg) => {
-    const mess = new MessageEmbed();
-    // if (err) throw err;
-    mongoClient.connect((err, db) => {
-      if (err) msg.channel.send(err);
+    console.log("✅ DB connected");
+    //LISTTTTTTT
+    commands(client, ["l", "list"], (msg) => {
+      const mess = new MessageEmbed();
+      // if (err) throw err;
+
       const dbo = db.db("discordDB");
       dbo
         .collection("playlist")
         .find({})
         .toArray(function (err, result) {
-          if (err) msg.channel.send(err);
+          try {
+            if (err) throw err;
+            const des = result
+              .map((i, index) => `${index + 1} - **${i.name}** : ${i.url}`)
+              .join("\n");
+            // console.log(des);
+            mess
+              .setColor("#fa7de5")
+              .setTitle("Your Playlists")
+              .setDescription(des)
+              .setFooter("Bot written by Ken 🔥");
+            msg.channel.send(mess);
 
-          const des = result
-            .map((i, index) => `${index + 1} - **${i.name}** : ${i.url}`)
-            .join("\n");
-          // console.log(des);
+            // db.close();
+          } catch (error) {
+            msg.channel.send(error);
+            // db.close();
+          }
+        });
+    });
+
+    //ADDDDDDDDDDDDDD
+    commands(client, ["add", "a"], (msg) => {
+      const name = msg.content.split(" ")[1];
+      const url = msg.content.split(" ")[2];
+      if (name && url) {
+        const mess = new MessageEmbed();
+        const dbo = db.db("discordDB");
+        const newData = { name, url };
+        dbo.collection("playlist").insertOne(newData, (error, res) => {
+          if (error) {
+            console.log(error);
+            // db.close(true);
+          }
           mess
-            .setColor("#fa7de5")
-            .setTitle("Your Playlists")
-            .setDescription(des)
+            .setColor("#e594b5")
+            .setTitle("Playlist added")
+            .addFields([
+              { name: "Name ", value: name, inline: true },
+              { name: "Link ", value: url, inline: true },
+            ])
             .setFooter("Bot written by Ken 🔥");
           msg.channel.send(mess);
+
+          // db.close(true);
         });
-      db.close();
+      } else {
+        const mess = new MessageEmbed();
+        mess
+          .setColor("#f5211d")
+          .setTitle("Missing args 😠 ")
+          .setDescription("`!kadd <playlist name> <url>`")
+          .setFooter("Bot written by Ken 🔥");
+
+        msg.channel.send(mess);
+      }
     });
   });
 
@@ -102,46 +143,6 @@ client.on("ready", () => {
   commands(client, ["leave"], (msg) => {
     const { voice } = msg.member;
     voice.channel.leave();
-  });
-
-  commands(client, ["add", "a"], (msg) => {
-    const name = msg.content.split(" ")[1];
-    const url = msg.content.split(" ")[2];
-    if (name && url) {
-      const mess = new MessageEmbed();
-      mongoClient.connect((err, db) => {
-        if (err) msg.channel.send(err);
-        const dbo = db.db("discordDB");
-        const newData = { name, url };
-        try {
-          dbo.collection("playlist").insertOne(newData, (err, res) => {
-            if (err) msg.channel.send(err);
-            mess
-              .setColor("#e594b5")
-              .setTitle("Playlist added")
-              .addFields([
-                { name: "Name ", value: name, inline: true },
-                { name: "Link ", value: url, inline: true },
-              ])
-              .setFooter("Bot written by Ken 🔥");
-            msg.channel.send(mess);
-          });
-        } catch (error) {
-          db.close();
-          console.log(error);
-        }
-        db.close();
-      });
-    } else {
-      const mess = new MessageEmbed();
-      mess
-        .setColor("#f5211d")
-        .setTitle("Missing args 😠 ")
-        .setDescription("`!kadd <playlist name> <url>`")
-        .setFooter("Bot written by Ken 🔥");
-
-      msg.channel.send(mess);
-    }
   });
 });
 
