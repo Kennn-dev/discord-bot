@@ -1,15 +1,25 @@
 require("dotenv").config();
 const { MongoClient } = require("mongodb");
-const { Client, MessageEmbed } = require("discord.js");
+const { Client, MessageEmbed, MessageAttachment } = require("discord.js");
 const ytdl = require("ytdl-core");
 const yts = require("yt-search");
+const { createApi } = require("unsplash-js");
+const nodeFetch = require("node-fetch");
 const client = new Client();
 
 const servers = [];
 //if the server doesn't have a set prefix yet
 // let defaultPrefix = '$kk';
 
+const itemsPerPage = 20;
+
 const commands = require("./commands");
+const { search } = require("ffmpeg-static");
+
+const unsplash = createApi({
+  accessKey: process.env.ACCESS_KEY_UNSPLASH,
+  fetch: nodeFetch,
+});
 
 const mongoClient = new MongoClient(process.env.MONGODB_URI, {
   useUnifiedTopology: true,
@@ -20,6 +30,8 @@ const mongoClient = new MongoClient(process.env.MONGODB_URI, {
 
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
+
+  //COMMANDS WITH DATABASE
   mongoClient.connect((err, db) => {
     if (err) console.log(err);
     console.log("✅ DB connected");
@@ -92,6 +104,66 @@ client.on("ready", () => {
     });
   });
 
+  //IMAGE RANDOM SEARCH
+  commands(client, ["img", "image"], (message) => {
+    const { content } = message;
+    // console.log(content);
+    const keyword = content.substr(content.indexOf(" ")).trim();
+    console.log(keyword);
+    if (!keyword) {
+      const mess = new MessageEmbed();
+      mess
+        .setColor("#f5211d")
+        .setTitle("Missing args 😠 ")
+        .setDescription("`!kimg <keyword>`")
+        .setFooter("Bot written by Ken 🔥");
+
+      msg.channel.send(mess);
+    }
+    // 1 -> itemsPerPage
+    const randomNum = Math.floor(Math.random() * itemsPerPage) + 1;
+    console.log(randomNum);
+    unsplash.search
+      .getPhotos({
+        query: keyword,
+        page: itemsPerPage % 2,
+        perPage: itemsPerPage,
+        contentFilter: "high",
+        lang: "vi",
+      })
+      .then((result) => {
+        if (result.errors) {
+          // handle error here
+          console.log("error occurred: ", result.errors[0]);
+          message.channel.send(result.errors[0]);
+        } else {
+          const feed = result.response;
+
+          // extract total and results array from response
+          const { total, results, total_pages } = feed;
+          console.log({ total, total_pages });
+          // const attachment = new MessageAttachment()
+          // handle success here
+          const embed = new MessageEmbed();
+          try {
+            if (!results[randomNum]) {
+              message.channel.send("Sumthing wrong ? 😥");
+            }
+            embed
+              .setImage(results[randomNum].urls.regular)
+              .setFooter(
+                `by ${results[randomNum].user.name}`,
+                results[randomNum].user.profile_image.small
+              );
+            message.channel.send(embed);
+          } catch (error) {
+            console.log(error);
+          }
+        }
+      });
+  });
+
+  //PLAYYYY
   commands(client, ["p", "play"], async (message) => {
     const url = message.content.split(" ")[1];
     function play(connection, message) {
@@ -139,7 +211,7 @@ client.on("ready", () => {
     //     usedCommandRecently4.delete(message.author.id)
     // }, 10000);
   });
-
+  //LEAVE
   commands(client, ["leave"], (msg) => {
     const { voice } = msg.member;
     voice.channel.leave();

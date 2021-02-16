@@ -19,6 +19,8 @@
     "dotenv": "^8.2.0",
     "ffmpeg-static": "^4.2.7",
     "mongodb": "^3.6.4",
+    "node-fetch": "^2.6.1",
+    "unsplash-js": "^7.0.4",
     "yt-search": "^2.6.0",
     "ytdl-core": "^4.4.5"
   }
