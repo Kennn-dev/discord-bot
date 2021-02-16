@@ -47,8 +47,8 @@ client.on("ready", () => {
             .setFooter("Bot written by Ken 🔥");
           msg.channel.send(mess);
         });
+      db.close();
     });
-    db.close();
   });
 
   commands(client, ["p", "play"], async (message) => {
@@ -127,6 +127,7 @@ client.on("ready", () => {
             msg.channel.send(mess);
           });
         } catch (error) {
+          db.close();
           console.log(error);
         }
         db.close();
