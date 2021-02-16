@@ -1,5 +1,5 @@
 # Discord Bot Commands
-Prefix : <code>!k</code>
+Prefix : `!k`
 
 ### Play
 -   Play a song with url : `!kplay <url>`

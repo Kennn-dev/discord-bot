@@ -20,7 +20,10 @@ const mongoClient = new MongoClient(process.env.MONGODB_URI, {
 
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
-
+  mongoClient.connect((err) => {
+    if (err) console.log(err);
+    mongoClient.close();
+  });
   commands(client, ["l", "list"], (msg) => {
     const mess = new MessageEmbed();
     // if (err) throw err;
@@ -31,7 +34,7 @@ client.on("ready", () => {
         .collection("playlist")
         .find({})
         .toArray(function (err, result) {
-          if (err) throw err;
+          if (err) msg.channel.send(err);
 
           const des = result
             .map((i, index) => `${index + 1} - **${i.name}** : ${i.url}`)
@@ -43,10 +46,9 @@ client.on("ready", () => {
             .setDescription(des)
             .setFooter("Bot written by Ken 🔥");
           msg.channel.send(mess);
-
-          db.close();
         });
     });
+    db.close();
   });
 
   commands(client, ["p", "play"], async (message) => {
@@ -111,20 +113,23 @@ client.on("ready", () => {
         if (err) msg.channel.send(err);
         const dbo = db.db("discordDB");
         const newData = { name, url };
-        dbo.collection("playlist").insertOne(newData, (err, res) => {
-          if (err) throw err;
-          mess
-            .setColor("#e594b5")
-            .setTitle("Playlist added")
-            .addFields([
-              { name: "Name ", value: name, inline: true },
-              { name: "Link ", value: url, inline: true },
-            ])
-            .setFooter("Bot written by Ken 🔥");
-          msg.channel.send(mess);
-
-          db.close();
-        });
+        try {
+          dbo.collection("playlist").insertOne(newData, (err, res) => {
+            if (err) msg.channel.send(err);
+            mess
+              .setColor("#e594b5")
+              .setTitle("Playlist added")
+              .addFields([
+                { name: "Name ", value: name, inline: true },
+                { name: "Link ", value: url, inline: true },
+              ])
+              .setFooter("Bot written by Ken 🔥");
+            msg.channel.send(mess);
+          });
+        } catch (error) {
+          console.log(error);
+        }
+        db.close();
       });
     } else {
       const mess = new MessageEmbed();
