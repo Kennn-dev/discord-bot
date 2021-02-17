@@ -1,12 +1,22 @@
 require("dotenv").config();
 const { MongoClient } = require("mongodb");
-const { Client, MessageEmbed, MessageAttachment } = require("discord.js");
+const { Client, MessageEmbed } = require("discord.js");
 const ytdl = require("ytdl-core");
 const yts = require("yt-search");
 const { createApi } = require("unsplash-js");
 const nodeFetch = require("node-fetch");
 const client = new Client();
+const cheerio = require("cheerio");
+const fetch = require("isomorphic-fetch");
 
+///import functions genshin
+const {
+  fetchImage,
+  fetchInfo,
+  fetchBuild,
+} = require("./genshinImpact/functions");
+
+const data = require("./genshinImpact/data");
 const servers = [];
 //if the server doesn't have a set prefix yet
 // let defaultPrefix = '$kk';
@@ -216,6 +226,56 @@ client.on("ready", () => {
     const { voice } = msg.member;
     voice.channel.leave();
   });
+
+  //GENSHIN INFO CHAR
+  commands(client, ["genshin"], async (msg) => {
+    const { content } = msg;
+    let charObj = null;
+    // console.log(content);
+    const keyword = content.substr(content.indexOf(" ")).trim();
+
+    for (let i in data) {
+      if (i === keyword) {
+        charObj = { name: i, id: data[i] };
+      }
+    }
+
+    if (charObj != null) {
+      // msg.channel.send(`Name : ${charObj.name} ID : ${charObj.id}`);
+      const urlImg = await fetchImage(charObj.id);
+      const getInfo = await fetchInfo(charObj.id);
+      const getBuild = await fetchBuild(charObj.id);
+      const mess = new MessageEmbed();
+      mess
+        .setColor("#fbaccc")
+        .setTitle(`Genshin impact`)
+        .setThumbnail(getInfo.iconElement)
+        .setImage(urlImg)
+        .setAuthor(`${charObj.name.toUpperCase()}`, getInfo.rating)
+        .setDescription(getInfo.info)
+        .addFields([
+          { name: getBuild.name.title, value: getBuild.name.des },
+          {
+            name: "Weapon 🔪",
+            value: getBuild.weapon != " " ? getBuild.weapon : "error",
+            inline: true,
+          },
+          {
+            name: "Artifacts ✨",
+            value: getBuild.artifact != " " ? getBuild.artifact : "error",
+            inline: true,
+          },
+        ])
+        .setFooter(`Bot written by Ken 🔥`, getInfo.iconWeapon)
+        .setTimestamp(new Date());
+
+      msg.channel.send(mess);
+      // console.log(getInfo);
+      // console.log(urlImg);
+    } else {
+      msg.channel.send(`Character's name doesn't exist 🤦‍♂️`);
+    }
+  });
 });
 
 client.on("guildMemberAdd", (member) => {
@@ -244,3 +304,5 @@ client.on("message", (msg) => {
 
 ///
 client.login(process.env.DISCORD_BOT_TOKEN);
+
+///Bennett Mona Lisa Diona venti razor jean amber
