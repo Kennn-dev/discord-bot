@@ -224,11 +224,6 @@ client.on("ready", () => {
       message.member.voice.channel.join().then(function (connection) {
         play(connection, message);
       });
-
-    // usedCommandRecently4.add(message.author.id);
-    // setTimeout(() => {
-    //     usedCommandRecently4.delete(message.author.id)
-    // }, 10000);
   });
   //LEAVE
   commands(client, ["leave"], (msg) => {
@@ -277,7 +272,7 @@ client.on("ready", () => {
             },
             {
               name: "Main Stat 💥",
-              value: getBuild.mainStat,
+              value: `⌛ : ${getBuild.mainStat[0].trim()} \n 🍸 : ${getBuild.mainStat[1].trim()} \n 👑 : ${getBuild.mainStat[2].trim()}`,
               inline: false,
             },
             {
@@ -310,10 +305,7 @@ client.on("ready", () => {
     let count = 0;
 
     const imageMess = messageWithImage(arrImages[0]);
-    // const messenge = await msg.channel.send(image);
 
-    // await messenge.react("◀");
-    // await messenge.react("▶");
     msg.channel.send(imageMess).then((message) => {
       //msg.author.id === user.id
       message.react("◀").then((r) => {
@@ -349,30 +341,6 @@ client.on("ready", () => {
         });
       });
     });
-
-    // messenge
-    //   .awaitReactions(
-    //     (reaction, user) =>
-    //       user.id === msg.author.id &&
-    //       (reaction._emoji.name === "◀" || reaction._emoji.name === "▶"),
-    //     { max: 1, time: 0, errors: ["time"] }
-    //   )
-    //   .then((collected) => {
-    //     console.log(collected.message);
-    //     if (collected.first().emoji.name == "▶") {
-    //       count += 1;
-    //       const editMess = messageWithImage(arrImages[count]);
-    //       editMess.setFooter(`${count + 1}/${arrImages.length}`);
-    //       messenge.edit(editMess);
-    //     }
-    //     if (collected.first().emoji.name == "◀") {
-    //       count -= 1;
-    //       const editMess = messageWithImage(arrImages[count]);
-    //       editMess.setFooter(`${count + 1}/${arrImages.length}`);
-    //       messenge.edit(editMess);
-    //     }
-    //   })
-    //   .catch((err) => msg.channel.send(err));
   });
 });
 

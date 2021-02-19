@@ -97,8 +97,9 @@ module.exports.fetchBuild = async function fetchBuild(id) {
       return $(el).text();
     })
     .get()
-    .slice(0, 3)
-    .join("");
+    .slice(0, 3);
+  // console.log(test1);
+  // .join("");
 
   const test2 = $(artifactHtml)
     .find("tbody > tr:nth-child(2) > td")
