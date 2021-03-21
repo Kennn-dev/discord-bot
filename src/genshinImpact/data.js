@@ -16,7 +16,7 @@ module.exports = {
   klee: 297521,
   lisa: 297515,
   mona: 297526,
-  nigguang: 297529,
+  ningguang: 297529,
   noelle: 297523,
   razor: 297519,
   rosaria: 314177,

@@ -46,6 +46,14 @@ const messageWithImage = (url) => {
     .setTitle("Material Farming Routes")
     .setFooter("Bot written by Ken 🔥");
 };
+const customMessageEmbed = (content, q) => {
+  const mess = new MessageEmbed();
+  return mess
+    .setColor("#fa7de5")
+    .setTitle("Cúng chùa tích đức 🕯🕯🕯")
+    .setDescription(content)
+    .setFooter(`Tổng số nhang : ${q}`);
+};
 
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
@@ -119,6 +127,30 @@ client.on("ready", () => {
           .setFooter("Bot written by Ken 🔥");
 
         msg.channel.send(mess);
+      }
+    });
+
+    //PRAY
+    commands(client, ["pray", "cung", "thapnhang"], (message) => {
+      const idUser = message.author.id;
+      // console.log(id)
+      const dbo = db.db("discordDB");
+      try {
+        dbo
+          .collection("prayers")
+          .findOneAndUpdate({ idUser }, { $inc: { prayTime: 1 } })
+          .then((result) => {
+            if (!result) console.log("Fail");
+            console.log(result);
+            message.channel.send(
+              customMessageEmbed(
+                `Bạn đã thắp 1 nén nhang cho Sư thầy <@401724978199920640>`,
+                result.value.prayTime + 1
+              )
+            );
+          });
+      } catch (error) {
+        if (error) console.log("something wrong in Pray !! check that");
       }
     });
   });
@@ -342,13 +374,6 @@ client.on("ready", () => {
       });
     });
   });
-});
-
-client.on("guildMemberAdd", (member) => {
-  const welcomeChannel = member.guild.channels.cache.get("806767655439695873");
-  const welcomeMsg = `Chào mừng <@${member.id}> ! Bạn vừa phí thêm một phần lớn thời gian cuộc đời vào cái server này 🤦‍♂️`;
-
-  welcomeChannel.send(welcomeMsg);
 });
 
 client.on("message", (msg) => {
