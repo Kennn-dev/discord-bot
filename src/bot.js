@@ -138,14 +138,18 @@ client.on("ready", () => {
       try {
         dbo
           .collection("prayers")
-          .findOneAndUpdate({ idUser }, { $inc: { prayTime: 1 } })
+          .findOneAndUpdate(
+            { idUser },
+            { $inc: { prayTime: 1 } },
+            { upsert: true }
+          )
           .then((result) => {
             if (!result) console.log("Fail");
             console.log(result);
             message.channel.send(
               customMessageEmbed(
                 `Bạn đã thắp 1 nén nhang cho Sư thầy <@401724978199920640>`,
-                result.value.prayTime + 1
+                result.value.prayTime ? result.value.prayTime + 1 : 1
               )
             );
           });
