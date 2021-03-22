@@ -149,7 +149,7 @@ client.on("ready", () => {
             message.channel.send(
               customMessageEmbed(
                 `Bạn đã thắp 1 nén nhang cho Sư thầy <@401724978199920640>`,
-                result.value.prayTime ? result.value.prayTime + 1 : 1
+                result.value != null ? result.value.prayTime + 1 : 1
               )
             );
           });
