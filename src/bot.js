@@ -50,7 +50,7 @@ const customMessageEmbed = (content, q) => {
   const mess = new MessageEmbed();
   return mess
     .setColor("#fa7de5")
-    .setTitle("Cúng chùa tích đức 🕯🕯🕯")
+    .setTitle("Cúng chùa tích đức 🕯")
     .setDescription(content)
     .setFooter(`Tổng số nhang : ${q}`);
 };
@@ -131,10 +131,20 @@ client.on("ready", () => {
     });
 
     //PRAY
+    const getCount = (prayTime) => {
+      if (prayTime.value === null) {
+        // console.log("Value null");
+        return 1;
+      } else {
+        // console.log("Not null");
+        return prayTime.value.prayTime + 1;
+      }
+    };
     commands(client, ["pray", "cung", "thapnhang"], (message) => {
       const idUser = message.author.id;
       // console.log(id)
       const dbo = db.db("discordDB");
+
       try {
         dbo
           .collection("prayers")
@@ -145,16 +155,17 @@ client.on("ready", () => {
           )
           .then((result) => {
             if (!result) console.log("Fail");
-            console.log(result);
+            // console.log(result);
+
             message.channel.send(
               customMessageEmbed(
                 `Bạn đã thắp 1 nén nhang cho Sư thầy <@401724978199920640>`,
-                result.value != null ? result.value.prayTime + 1 : 1
+                getCount(result)
               )
             );
           });
       } catch (error) {
-        if (error) console.log("something wrong in Pray !! check that");
+        console.log("something wrong in Pray !! check that");
       }
     });
   });
