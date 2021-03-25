@@ -142,7 +142,7 @@ client.on("ready", () => {
     };
     commands(client, ["pray", "cung", "thapnhang"], (message) => {
       const idUser = message.author.id;
-      // console.log(id)
+      console.log(idUser);
       const dbo = db.db("discordDB");
 
       try {
@@ -154,15 +154,23 @@ client.on("ready", () => {
             { upsert: true }
           )
           .then((result) => {
-            if (!result) console.log("Fail");
+            if (!result) console.log("Cannot find & create");
             // console.log(result);
-
-            message.channel.send(
-              customMessageEmbed(
-                `Bạn đã thắp 1 nén nhang cho Sư thầy <@401724978199920640>`,
-                getCount(result)
-              )
-            );
+            if (idUser === 401724978199920640) {
+              message.channel.send(
+                customMessageEmbed(
+                  `Sư thầy cũng cần thắp nhang cầu may à ? 😏`,
+                  getCount(result)
+                )
+              );
+            } else {
+              message.channel.send(
+                customMessageEmbed(
+                  `Bạn đã thắp 1 nén nhang cho Sư thầy <@401724978199920640>`,
+                  getCount(result)
+                )
+              );
+            }
           });
       } catch (error) {
         console.log("something wrong in Pray !! check that");
