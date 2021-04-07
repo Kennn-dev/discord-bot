@@ -9,7 +9,7 @@ module.exports.fetchImage = async function fetchImage(id) {
   const $ = cheerio.load(imageUrl);
 
   //   console.log($);
-  return $("#hl_1").next().find(".center > img").attr("src");
+  return $("#hl_1").next().find(".center > img").attr("data-src");
 };
 
 module.exports.fetchInfo = async function fetchInfo(id) {
@@ -24,19 +24,20 @@ module.exports.fetchInfo = async function fetchInfo(id) {
     .find(
       "table > tbody > tr:nth-child(2) > td:nth-child(2) > div:nth-child(1) > img"
     )
-    .attr("src");
+
+    .attr("data-src");
   const iconElement = $("#hl_1")
     .next()
     .find(
       "table > tbody > tr:nth-child(2) > td:nth-child(2) > div:nth-child(3) > div:nth-child(2) > a > img"
     )
-    .attr("src");
+    .attr("data-src");
   const iconWeapon = $("#hl_1")
     .next()
     .find(
       "table > tbody > tr:nth-child(2) > td:nth-child(2) > div:nth-child(3) > div:nth-child(4) > a > img"
     )
-    .attr("src");
+    .attr("data-src");
 
   const info = $("#hl_1")
     .next()
@@ -46,7 +47,7 @@ module.exports.fetchInfo = async function fetchInfo(id) {
     .text()
     .replace(/(\n\n\n|\r)/gm, "\n")
     .replace(/(\r\n|\n\n|\n\n\n|\r)/gm, "\n");
-  //   console.log(iconWeapon);
+  console.log({ rating, info, iconElement, iconWeapon });
   return { rating, info, iconElement, iconWeapon };
 };
 

@@ -341,12 +341,14 @@ client.on("ready", () => {
 
         msg.channel.send(mess);
       } catch (error) {
-        const messErr = new MessageEmbed();
-        messErr
-          .setColor("#ff0000")
-          .setTitle(`Got new Error ⚠`)
-          .setDescription(error)
-          .setTimestamp(new Date());
+        if (error) {
+          const messErr = new MessageEmbed();
+          messErr
+            .setColor("#ff0000")
+            .setTitle(`Got new Error ⚠`)
+            .setDescription(error.message)
+            .setTimestamp(new Date());
+        }
       }
     } else {
       msg.channel.send(`Character's name doesn't exist 🤦‍♂️`);
