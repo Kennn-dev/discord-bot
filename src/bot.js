@@ -401,7 +401,37 @@ client.on("ready", () => {
   });
 });
 
+const authors = [];
 client.on("message", (msg) => {
+  // anti spam/
+  if (msg.author.bot) return;
+  if (
+    msg.author.id != msg.author.bot &&
+    msg.channel.id === "819638171184005140"
+  ) {
+    authors.push({
+      content: msg.content,
+      author: msg.author.id,
+    });
+
+    let count = 0;
+    for (let i = 0; i < authors.length; i++) {
+      if (
+        authors[i].content == msg.content &&
+        authors[i].author == msg.author.id
+      ) {
+        count++;
+      } else {
+        count = 0;
+      }
+    }
+
+    if (count >= 3) {
+      msg.channel.send(`<@${msg.author.id}>, Spam con đỉ mẹ mày hay gì ? `);
+      msg.delete({ timeout: 3000, reason: "Spaming" });
+    }
+  }
+
   if (msg.content === "hello") {
     msg.reply("Lô con cặc !!!");
   }
