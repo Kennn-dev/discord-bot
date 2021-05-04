@@ -403,11 +403,21 @@ client.on("ready", () => {
 
 const authors = [];
 client.on("message", (msg) => {
-  // anti spam/
   if (msg.author.bot) return;
+  if (msg.channel.id === "561798348747833349") {
+    //chat channel
+    // Deal with command
+    if (msg.content.startsWith("-p" || "-play" || "!p" || "!play")) {
+      const navChannel = msg.guild.channels.cache
+        .get("562357669063557282")
+        .toString();
+      msg.channel.send(`Cút lên ${navChannel} mà gọi nhạc 😡`);
+    }
+  }
+
   if (
     msg.author.id != msg.author.bot &&
-    msg.channel.id === "819638171184005140"
+    msg.channel.id == "819638171184005140"
   ) {
     authors.push({
       content: msg.content,
@@ -428,27 +438,19 @@ client.on("message", (msg) => {
 
     if (count >= 3) {
       msg.channel.send(`<@${msg.author.id}>, Spam con đỉ mẹ mày hay gì ? `);
-      msg.delete({ timeout: 3000, reason: "Spaming" });
+      msg.channel
+        .fetch({ limit: 3 })
+        .then((msgs) =>
+          msgs.messages.cache.map((i) => i.delete({ reason: "Spaming" }))
+        )
+        .catch((err) => console.log(err));
     }
   }
 
   if (msg.content === "hello") {
     msg.reply("Lô con cặc !!!");
   }
-
-  if (msg.channel.id === "561798348747833349") {
-    //chat channel
-    // Deal with command
-    if (msg.content.startsWith("-p" || "-play" || "!p" || "!play")) {
-      const navChannel = msg.guild.channels.cache
-        .get("562357669063557282")
-        .toString();
-      msg.channel.send(`Cút lên ${navChannel} mà gọi nhạc 😡`);
-    }
-  }
 });
 
 ///
 client.login(process.env.DISCORD_BOT_TOKEN);
-
-///Bennett Mona Lisa Diona venti razor jean amber
