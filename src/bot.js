@@ -370,7 +370,7 @@ client.on("ready", () => {
       // console.log(input);
       const data = new URLSearchParams();
       data.append("input", input);
-      data.append("speaker_id", speaker_id);
+      data.append("speaker_id", Number(speaker_id));
       console.log(data);
       await fetch("https://api.zalo.ai/v1/tts/synthesize", {
         method: "POST",
