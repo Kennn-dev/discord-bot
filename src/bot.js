@@ -395,13 +395,14 @@ client.on("ready", () => {
     try {
       const voicesId = [1, 2, 3, 4];
       const input = msg.content.split("!kvoice")[1];
-      if (Number(input).indexOf(voicesId) == -1) {
-        speaker_id = Number(input);
-        const mess = new MessageEmbed();
+      if (input.indexOf(voicesId) === -1) {
+        // console.log(speaker_id);
+        speaker_id = input;
+        let mess = new MessageEmbed();
         mess
           .setColor("#fa7de5")
           .setTitle("Success")
-          .setDescription("Đổi giọng thành công 👌");
+          .setDescription(`Đổi giọng thành công 👌 ${speaker_id}`);
         msg.channel.send(mess);
       } else {
         msg.channel.send("Voice id giá trị từ `1- 4` thui bạn ei 👉👈");
