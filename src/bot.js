@@ -355,49 +355,62 @@ client.on("ready", () => {
     }
   });
 
-  //REACTIONS
-  commands(client, ["genshinfarm", "gsf"], async (msg) => {
-    const arrImages = await fetchFarm();
-
-    let count = 0;
-
-    const imageMess = messageWithImage(arrImages[0]);
-
-    msg.channel.send(imageMess).then((message) => {
-      //msg.author.id === user.id
-      message.react("◀").then((r) => {
-        message.react("▶");
-        //filter
-        const backFilter = (reaction, user) =>
-          reaction.emoji.name === "◀" && user.id === msg.author.id;
-        const nextFilter = (reaction, user) =>
-          reaction.emoji.name === "▶" && user.id === msg.author.id;
-        const back = message.createReactionCollector(backFilter, {
-          timer: 999999,
+  //TEXT TO SPEAK
+  var speaker_id = 1;
+  commands(client, ["s"], async (msg) => {
+    try {
+      //join room
+      if (!msg.member.voice.channel) {
+        msg.channel.send("Vào phòng đi anh yêu");
+        return;
+      }
+      const connection = await msg.member.voice.channel.join();
+      const input = msg.content.split("!ks")[1];
+      // console.log(input);
+      const data = new URLSearchParams();
+      data.append("input", input);
+      data.append("speaker_id", speaker_id ? speaker_id : 2);
+      await fetch("https://api.zalo.ai/v1/tts/synthesize", {
+        method: "POST",
+        headers: {
+          apikey: process.env.ZALO_KEY,
+          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+        },
+        body: data,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          // console.log(data);
+          if (data.error_code === 0) {
+            connection.play(data.data.url);
+          }
         });
-        const next = message.createReactionCollector(nextFilter, {
-          timer: 999999,
-        });
-
-        back.on("collect", (rs) => {
-          if (count === 0) return;
-          count -= 1;
-          const editMess = messageWithImage(arrImages[count]);
-          editMess.setFooter(`${count + 1}/${arrImages.length}`);
-          message.edit(editMess);
-          // rs.remove(r.users.filter((u) => u === msg.author).first());
-        });
-
-        next.on("collect", (rs) => {
-          if (count + 1 === arrImages.length) return;
-          count += 1;
-          const editMess = messageWithImage(arrImages[count]);
-          editMess.setFooter(`${count + 1}/${arrImages.length}`);
-          message.edit(editMess);
-          // rs.remove(r.users.filter((u) => u === msg.author).first());
-        });
-      });
-    });
+    } catch (error) {
+      if (error) {
+        msg.channel.send(error);
+      }
+    }
+  });
+  commands(client, ["voice"], async (msg) => {
+    try {
+      const voicesId = [1, 2, 3, 4];
+      const input = msg.content.split("!kvoice")[1];
+      if (Number(input).indexOf(voicesId) == -1) {
+        speaker_id = Number(input);
+        const mess = new MessageEmbed();
+        mess
+          .setColor("#fa7de5")
+          .setTitle("Success")
+          .setDescription("Đổi giọng thành công 👌");
+        msg.channel.send(mess);
+      } else {
+        msg.channel.send("Voice id giá trị từ `1- 4` thui bạn ei 👉👈");
+      }
+    } catch (error) {
+      if (error) {
+        msg.channel.send(error);
+      }
+    }
   });
 });
 
@@ -406,6 +419,7 @@ client.on("message", (msg) => {
   if (msg.author.bot) return;
   if (msg.channel.id === "561798348747833349") {
     //chat channel
+
     // Deal with command
     if (msg.content.startsWith("-p" || "-play" || "!p" || "!play")) {
       const navChannel = msg.guild.channels.cache
