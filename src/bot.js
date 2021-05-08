@@ -19,6 +19,7 @@ const {
 
 const data = require("./genshinImpact/data");
 const servers = [];
+
 let speaker_id = 1;
 //if the server doesn't have a set prefix yet
 // let defaultPrefix = '$kk';
@@ -371,6 +372,7 @@ client.on("ready", () => {
       const data = new URLSearchParams();
       data.append("input", input);
       data.append("speaker_id", Number(speaker_id));
+      data.append("speed", Number(0.8));
       console.log(data);
       await fetch("https://api.zalo.ai/v1/tts/synthesize", {
         method: "POST",
@@ -382,7 +384,7 @@ client.on("ready", () => {
       })
         .then((response) => response.json())
         .then((data) => {
-          // console.log(data);
+          console.log(data);
           if (data.error_code === 0) {
             connection.play(data.data.url);
           }
