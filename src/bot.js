@@ -373,8 +373,8 @@ client.on("ready", () => {
       data.append("input", input);
       data.append("speaker_id", Number(speaker_id));
       data.append("speed", Number(0.8));
-      console.log(data);
-      await fetch("https://api.zalo.ai/v1/tts/synthesize", {
+      // console.log(data);
+      await fetch(process.env.ZALO_URL,{
         method: "POST",
         headers: {
           apikey: process.env.ZALO_KEY,
@@ -384,7 +384,7 @@ client.on("ready", () => {
       })
         .then((response) => response.json())
         .then((data) => {
-          console.log(data);
+          // console.log(data);
           if (data.error_code === 0) {
             connection.play(data.data.url);
           }
