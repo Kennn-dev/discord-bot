@@ -46,54 +46,58 @@ const videoPlayer = async (guild, song) => {
       songQueue.songs.shift();
       videoPlayer(guild, songQueue.songs[0]);
     });
-    await songQueue.textChannel.send(`🎼 Đang drop bài ${song.title}`);
+    await songQueue.textChannel.send(`🎼 Đang drop bài **${song.title}**`);
   } catch (error) {
     console.log(error);
   }
 };
 const play = async (msg, client) => {
-  const voiceChannel = msg.member.voice.channel;
-  const textChannel = msg.channel;
-  if (!voiceChannel) {
-    msg.channel.send("Vào room dùm cái !");
-    return;
-  }
-  const connection = await msg.member.voice.channel.join();
-  if (!connection) {
-    msg.channel.send("Join room failed");
-    return;
-  }
-  const serverQ = queue.get(msg.guild.id);
-  const query = msg.content.split("!kp")[1].trim();
-  if (!query) return mgs.channel.send("Search đàng hoàng đi !");
-  const song = await songSearch(query);
-  if (!song) {
-    msg.channel.send("Tìm không ra luôn á 🙃");
-  }
+  try {
+    const voiceChannel = msg.member.voice.channel;
+    const textChannel = msg.channel;
+    if (!voiceChannel) {
+      msg.channel.send("Vào room dùm cái !");
+      return;
+    }
 
-  if (!serverQ) {
-    console.log("NO Queue");
-    const queueValue = {
-      voiceChannel,
-      textChannel,
-      connection,
-      songs: [],
-    };
-    queue.set(msg.guild.id, queueValue);
-    queueValue.songs.push(song);
-    try {
-      videoPlayer(msg.guild, queueValue.songs[0]);
-    } catch (err) {
-      queue.delete(msg.guild.id);
-      msg.channel.send("Có gì đó sai sai rồi, check logs xem !");
+    const connection = await msg.member.voice.channel.join();
+    if (!connection) {
+      msg.channel.send("Join room failed");
+      return;
     }
-  } else {
+
+    const serverQ = queue.get(msg.guild.id);
+    const query = msg.content.split("!kp")[1].trim();
+    if (!query) return mgs.channel.send("Search đàng hoàng đi !");
+    const song = await songSearch(query);
     if (!song) {
-      msg.channel.send(`Lên nhạc đi chời , hết list rồi ! 🙈`);
+      msg.channel.send("Tìm không ra luôn á 🙃");
     }
-    queue.songs.push(song);
-    msg.channel.send(`🎹 ${song.title} đã thêm vào quêu`);
-    return;
+
+    if (!serverQ) {
+      console.log("NO Queue");
+      const queueValue = {
+        voiceChannel,
+        textChannel,
+        connection,
+        songs: [],
+      };
+      queue.set(msg.guild.id, queueValue);
+      queueValue.songs.push(song);
+
+      videoPlayer(msg.guild, queueValue.songs[0]);
+    } else {
+      if (!song) {
+        msg.channel.send(`Lên nhạc đi chời , hết list rồi ! 🙈`);
+      }
+      queue.get(msg.guild.id).songs.push(song);
+      msg.channel.send(`🎹 **${song.title}** đã thêm vào quêu`);
+      return;
+    }
+  } catch (err) {
+    console.log(err);
+    queue.delete(msg.guild.id);
+    msg.channel.send("Có gì đó sai sai rồi, check logs xem !");
   }
 };
 

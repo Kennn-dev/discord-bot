@@ -59,6 +59,8 @@ const customMessageEmbed = (content, q) => {
     .setFooter(`Tổng số nhang : ${q}`);
 };
 
+const serverQueue = null;
+
 client.on("ready", () => {
   client.setMaxListeners(0);
   console.log(`Logged in as ${client.user.tag}!`);
@@ -67,8 +69,9 @@ client.on("ready", () => {
   mongoClient.connect((err, db) => {
     if (err) console.log(err);
     console.log("✅ DB connected");
-    commands(client, [ "p"], (msg) => {
-      playFeature(msg, client);
+    commands(client, ["p"], (msg) => {
+      // serverQueue = msg.guild.id
+      playFeature(msg, client, serverQueue);
     });
     //LISTTTTTTT
     commands(client, ["l", "list"], (msg) => {
