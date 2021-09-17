@@ -88,6 +88,9 @@ const play = async (msg, client) => {
       msg.channel.send("Có gì đó sai sai rồi, check logs xem !");
     }
   } else {
+    if (!song) {
+      msg.channel.send(`Lên nhạc đi chời , hết list rồi ! 🙈`);
+    }
     queue.songs.push(song);
     msg.channel.send(`🎹 ${song.title} đã thêm vào quêu`);
     return;
