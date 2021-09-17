@@ -5,7 +5,7 @@ const queue = async (msg, serverQ) => {
   try {
     const data = await serverQ;
     const songs = await data.songs;
-    console.log("songs", songs);
+    // console.log("songs", songs);
     if (!data && songs.length == 0) {
       msg.channel.send("Chưa có bài nào 😀");
     }

@@ -20,6 +20,8 @@ const {
 const data = require("./genshinImpact/data");
 const { play: playFeature } = require("./music/play");
 const { queue: queueFeature } = require("./music/queue");
+const { clear: clearQFeature } = require("./music/clearQueue");
+const { skip: skipFeature } = require("./music/skip");
 const servers = [];
 
 let speaker_id = 1;
@@ -75,6 +77,34 @@ client.on("ready", () => {
     // QUEUE
     commands(client, ["q"], (msg) => {
       queueFeature(msg, serverQ);
+    });
+    // CLEAR
+    commands(client, ["clear"], (msg) => {
+      serverQ = clearQFeature(msg);
+    });
+    // SKIP
+    commands(client, ["skip"], (msg) => {
+      return skipFeature(msg, serverQ);
+    });
+    // Help
+    commands(client, ["help"], (msg) => {
+      const mess = new MessageEmbed();
+      mess
+        .setColor("#fa7de5")
+        .setTitle(`Lít commands`)
+        .setDescription(
+          `
+        * Play : !kp
+        * Skip : !kskip
+        * Leave : !kleave
+        * Say : !ks
+        * Clear : !kclear
+        * Watch Quêu : !kq 
+        * Change voice : !kvoice [1 - 4]
+        `
+        )
+        .setFooter(`Bot written by Ken 🔥"`);
+      msg.channel.send(mess);
     });
     //LISTTTTTTT
     commands(client, ["l", "list"], (msg) => {
