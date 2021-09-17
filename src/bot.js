@@ -18,6 +18,7 @@ const {
 } = require("./genshinImpact/functions");
 
 const data = require("./genshinImpact/data");
+const { play: playFeature } = require("./music/play");
 const servers = [];
 
 let speaker_id = 1;
@@ -28,6 +29,7 @@ const itemsPerPage = 20;
 
 const commands = require("./commands");
 const { search } = require("ffmpeg-static");
+const { fetchLyrics } = require("./genius-crawl");
 
 const unsplash = createApi({
   accessKey: process.env.ACCESS_KEY_UNSPLASH,
@@ -58,12 +60,16 @@ const customMessageEmbed = (content, q) => {
 };
 
 client.on("ready", () => {
+  client.setMaxListeners(0);
   console.log(`Logged in as ${client.user.tag}!`);
 
   //COMMANDS WITH DATABASE
   mongoClient.connect((err, db) => {
     if (err) console.log(err);
     console.log("✅ DB connected");
+    commands(client, [ "p"], (msg) => {
+      playFeature(msg, client);
+    });
     //LISTTTTTTT
     commands(client, ["l", "list"], (msg) => {
       const mess = new MessageEmbed();
@@ -239,49 +245,6 @@ client.on("ready", () => {
       });
   });
 
-  //PLAYYYY
-  commands(client, ["p", "play"], async (message) => {
-    const url = message.content.split(" ")[1];
-    function play(connection, message) {
-      var server = servers[message.guild.id];
-      server.dispatcher = connection.play(
-        ytdl(server.queue[0], { filter: "audioonly" })
-      );
-      server.queue.shift();
-      message.channel.send("\n Adding song to queue!");
-      server.dispatcher.on("end", function () {
-        if (server.queue[0]) {
-          play(connection, message);
-        } else {
-          connection.disconnect();
-        }
-      });
-    }
-
-    if (!url) {
-      message.channel.send("\n you need to provide a link!!");
-      return;
-    }
-
-    if (!message.member.voice.channel) {
-      message.channel.send(" \n You must be in a voice channel to play music!");
-      return;
-    }
-
-    if (!servers[message.guild.id])
-      servers[message.guild.id] = {
-        queue: [],
-      };
-
-    var server = servers[message.guild.id];
-
-    server.queue.push(url);
-
-    if (!message.guild.voiceConnection)
-      message.member.voice.channel.join().then(function (connection) {
-        play(connection, message);
-      });
-  });
   //LEAVE
   commands(client, ["leave"], (msg) => {
     const { voice } = msg.member;
@@ -374,7 +337,7 @@ client.on("ready", () => {
       data.append("speaker_id", Number(speaker_id));
       data.append("speed", Number(0.8));
       // console.log(data);
-      await fetch(process.env.ZALO_URL,{
+      await fetch(process.env.ZALO_URL, {
         method: "POST",
         headers: {
           apikey: process.env.ZALO_KEY,
@@ -395,6 +358,7 @@ client.on("ready", () => {
       }
     }
   });
+  /// VOICE CHANGE
   commands(client, ["voice"], async (msg) => {
     try {
       const voicesId = [1, 2, 3, 4];
