@@ -51,7 +51,7 @@ const videoPlayer = async (guild, song) => {
     console.log(error);
   }
 };
-const play = async (msg, client) => {
+const play = async (msg, client, serverQ) => {
   try {
     const voiceChannel = msg.member.voice.channel;
     const textChannel = msg.channel;
@@ -66,7 +66,7 @@ const play = async (msg, client) => {
       return;
     }
 
-    const serverQ = queue.get(msg.guild.id);
+    serverQ = queue.get(msg.guild.id);
     const query = msg.content.split("!kp")[1].trim();
     if (!query) return mgs.channel.send("Search đàng hoàng đi !");
     const song = await songSearch(query);
@@ -86,13 +86,14 @@ const play = async (msg, client) => {
       queueValue.songs.push(song);
 
       videoPlayer(msg.guild, queueValue.songs[0]);
+      return serverQ;
     } else {
-      if (!song) {
+      if (queue.get(msg.guild.id).songs.length == 0) {
         msg.channel.send(`Lên nhạc đi chời , hết list rồi ! 🙈`);
       }
       queue.get(msg.guild.id).songs.push(song);
       msg.channel.send(`🎹 **${song.title}** đã thêm vào quêu`);
-      return;
+      return serverQ;
     }
   } catch (err) {
     console.log(err);

@@ -19,6 +19,7 @@ const {
 
 const data = require("./genshinImpact/data");
 const { play: playFeature } = require("./music/play");
+const { queue: queueFeature } = require("./music/queue");
 const servers = [];
 
 let speaker_id = 1;
@@ -58,9 +59,7 @@ const customMessageEmbed = (content, q) => {
     .setDescription(content)
     .setFooter(`Tổng số nhang : ${q}`);
 };
-
-const serverQueue = null;
-
+let serverQ = null;
 client.on("ready", () => {
   client.setMaxListeners(0);
   console.log(`Logged in as ${client.user.tag}!`);
@@ -69,9 +68,13 @@ client.on("ready", () => {
   mongoClient.connect((err, db) => {
     if (err) console.log(err);
     console.log("✅ DB connected");
+    // PLAY
     commands(client, ["p"], (msg) => {
-      // serverQueue = msg.guild.id
-      playFeature(msg, client, serverQueue);
+      serverQ = playFeature(msg, client, serverQ);
+    });
+    // QUEUE
+    commands(client, ["q"], (msg) => {
+      queueFeature(msg, serverQ);
     });
     //LISTTTTTTT
     commands(client, ["l", "list"], (msg) => {
