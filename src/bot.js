@@ -62,6 +62,8 @@ const customMessageEmbed = (content, q) => {
     .setFooter(`Tổng số nhang : ${q}`);
 };
 let serverQ = null;
+
+const queue = new Map();
 client.on("ready", () => {
   client.setMaxListeners(0);
   console.log(`Logged in as ${client.user.tag}!`);
@@ -72,15 +74,16 @@ client.on("ready", () => {
     console.log("✅ DB connected");
     // PLAY
     commands(client, ["p"], (msg) => {
-      serverQ = playFeature(msg, client, serverQ);
+      serverQ = playFeature(msg, queue, serverQ);
     });
     // QUEUE
     commands(client, ["q"], (msg) => {
       queueFeature(msg, serverQ);
     });
     // CLEAR
-    commands(client, ["clear"], (msg) => {
-      serverQ = clearQFeature(msg);
+    commands(client, ["clear"], async (msg) => {
+      queue.delete(msg.guild.id);
+      msg.channel.send("Clear 🌈");
     });
     // SKIP
     commands(client, ["skip"], (msg) => {

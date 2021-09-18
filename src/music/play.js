@@ -1,7 +1,6 @@
 const ytdl = require("ytdl-core");
 const ytSearch = require("yt-search");
 
-const queue = new Map();
 const finder = async (query) => {
   const search = await ytSearch(query);
   if (search.videos.length > 0) {
@@ -33,7 +32,7 @@ const songSearch = async (input) => {
     };
   }
 };
-const videoPlayer = async (guild, song) => {
+const videoPlayer = async (guild, song, queue) => {
   try {
     const songQueue = queue.get(guild.id);
     if (!song) {
@@ -51,7 +50,7 @@ const videoPlayer = async (guild, song) => {
     console.log(error);
   }
 };
-const play = async (msg, client, serverQ) => {
+const play = async (msg, queue, serverQ) => {
   try {
     const voiceChannel = msg.member.voice.channel;
     const textChannel = msg.channel;
@@ -85,7 +84,7 @@ const play = async (msg, client, serverQ) => {
       queue.set(msg.guild.id, queueValue);
       queueValue.songs.push(song);
 
-      videoPlayer(msg.guild, queueValue.songs[0]);
+      videoPlayer(msg.guild, queueValue.songs[0], queue);
       return serverQ;
     } else {
       if (queue.get(msg.guild.id).songs.length == 0) {
