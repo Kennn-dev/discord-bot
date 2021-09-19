@@ -61,7 +61,6 @@ const customMessageEmbed = (content, q) => {
     .setDescription(content)
     .setFooter(`Tổng số nhang : ${q}`);
 };
-let serverQ = null;
 
 client.on("ready", () => {
   client.setMaxListeners(0);
@@ -73,7 +72,7 @@ client.on("ready", () => {
     console.log("✅ DB connected");
     // PLAY
     commands(client, ["p"], (msg) => {
-      serverQ = playFeature(msg, serverQ);
+      serverQ = playFeature(msg);
     });
     // QUEUE
     commands(client, ["q"], (msg) => {

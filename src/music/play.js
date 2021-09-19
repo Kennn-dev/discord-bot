@@ -5,6 +5,7 @@ const Youtube = require("simple-youtube-api");
 const youtube = new Youtube(process.env.YOUTUBE_API_KEY);
 
 const queue = new Map();
+
 const finder = async (query) => {
   const search = await ytSearch(query);
   if (search.videos.length > 0) {
@@ -36,25 +37,31 @@ const songSearch = async (input) => {
     };
   }
 };
-const videoPlayer = async (guild, song) => {
+const videoPlayer = async (msg, song) => {
   try {
-    const songQueue = queue.get(guild.id);
+    const songQueue = queue.get(msg.guild.id);
     if (!song) {
-      msg.channel.send(`Lên nhạc đi chời , hết list rồi ! 🙈`);
+      msg.channel.send("Hết nhạc rồi ! 🤐");
+      songQueue.isPlaying = false;
+      // songQueue.voiceChannel.leave();
+      //   queue.delete(msg.guild.id);
       return;
     }
+    songQueue.isPlaying = true;
     const stream = ytdl(song.url, { filter: "audioonly" });
     songQueue.connection.play(stream).on("finish", () => {
       songQueue.songs.shift();
-      videoPlayer(guild, songQueue.songs[0]);
+      videoPlayer(msg, songQueue.songs[0]);
     });
     await songQueue.textChannel.send(`🎼 Đang drop bài **${song.title}**`);
   } catch (error) {
+    queue.delete(msg.guild.id);
+
     console.log(error);
   }
 };
 
-const play = async (msg, serverQ) => {
+const play = async (msg) => {
   try {
     const voiceChannel = msg.member.voice.channel;
     const textChannel = msg.channel;
@@ -69,7 +76,7 @@ const play = async (msg, serverQ) => {
       return;
     }
 
-    serverQ = queue.get(msg.guild.id);
+    const serverQ = queue.get(msg.guild.id);
     const query = msg.content.split("!kp")[1].trim();
     if (!query) return mgs.channel.send("Search đàng hoàng đi !");
 
@@ -106,11 +113,11 @@ const play = async (msg, serverQ) => {
     }
 
     if (!serverQ) {
-      console.log("NO Queue");
       const queueValue = {
         voiceChannel,
         textChannel,
         connection,
+        isPLaying: true,
         songs: [],
       };
       queue.set(msg.guild.id, queueValue);
@@ -122,17 +129,22 @@ const play = async (msg, serverQ) => {
         });
         msg.channel.send(`Vừa thêm ${queueValue.songs.length} vào quêu 🎶`);
       } else {
+        // console.log(song);
         queueValue.songs.push(song);
       }
 
-      videoPlayer(msg.guild, queueValue.songs[0], queue);
-      return serverQ;
+      videoPlayer(msg, queueValue.songs[0]);
     } else {
-      // Has queue
-
+      // Has server queue
+      //  push a new song
       queue.get(msg.guild.id).songs.push(song);
       msg.channel.send(`🎹 **${song.title}** đã thêm vào quêu`);
-      return serverQ;
+      if (!serverQ.isPlaying) {
+        // if freezing , resume
+        console.log("is playing", serverQ.isPlaying);
+        // queue.get(msg.guild.id).songs.push(song);
+        videoPlayer(msg, queue.get(msg.guild.id).songs[0]);
+      }
     }
   } catch (err) {
     console.log(err);
@@ -158,11 +170,12 @@ const queueShow = (msg) => {
       msg.channel.send("Vào room dùm cái !");
       return;
     }
-    const songs = queue.get(msg.guild.id).songs;
-    if (!songs || songs.length == 0) {
+    const serverQ = queue.get(msg.guild.id);
+    if (!serverQ || !serverQ.songs) {
       msg.channel.send("Hết nhạc rồi 💩 !");
       return;
     }
+    const { songs } = serverQ;
     const mess = new MessageEmbed();
     const des = songs
       .map((song, index) => {
