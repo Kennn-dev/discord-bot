@@ -6,7 +6,7 @@ const skip = async (msg, serverQ) => {
     return;
   }
   if (!serverQ) {
-    message.channel.send("Hết nhạc rồi sao skip ? U la troi 😠");
+    msg.channel.send("Hết nhạc rồi sao skip ? U la troi 😠");
   }
   const data = await serverQ;
   const connection = await data.connection;

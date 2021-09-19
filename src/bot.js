@@ -18,10 +18,12 @@ const {
 } = require("./genshinImpact/functions");
 
 const data = require("./genshinImpact/data");
-const { play: playFeature } = require("./music/play");
-const { queue: queueFeature } = require("./music/queue");
-const { clear: clearQFeature } = require("./music/clearQueue");
-const { skip: skipFeature } = require("./music/skip");
+const {
+  play: playFeature,
+  clear: clearFeature,
+  queue: queueFeature,
+  skip: skipFeature,
+} = require("./music/play");
 const servers = [];
 
 let speaker_id = 1;
@@ -31,8 +33,6 @@ let speaker_id = 1;
 const itemsPerPage = 20;
 
 const commands = require("./commands");
-const { search } = require("ffmpeg-static");
-const { fetchLyrics } = require("./genius-crawl");
 
 const unsplash = createApi({
   accessKey: process.env.ACCESS_KEY_UNSPLASH,
@@ -63,7 +63,6 @@ const customMessageEmbed = (content, q) => {
 };
 let serverQ = null;
 
-const queue = new Map();
 client.on("ready", () => {
   client.setMaxListeners(0);
   console.log(`Logged in as ${client.user.tag}!`);
@@ -74,20 +73,19 @@ client.on("ready", () => {
     console.log("✅ DB connected");
     // PLAY
     commands(client, ["p"], (msg) => {
-      serverQ = playFeature(msg, queue, serverQ);
+      serverQ = playFeature(msg, serverQ);
     });
     // QUEUE
     commands(client, ["q"], (msg) => {
-      queueFeature(msg, serverQ);
+      queueFeature(msg);
     });
     // CLEAR
-    commands(client, ["clear"], async (msg) => {
-      queue.delete(msg.guild.id);
-      msg.channel.send("Clear 🌈");
+    commands(client, ["clear"], (msg) => {
+      clearFeature(msg);
     });
     // SKIP
     commands(client, ["skip"], (msg) => {
-      return skipFeature(msg, serverQ);
+      skipFeature(msg);
     });
     // Help
     commands(client, ["help"], (msg) => {
