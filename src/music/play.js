@@ -1,7 +1,6 @@
 const { MessageEmbed, Util } = require("discord.js");
 const ytdl = require("ytdl-core");
 const ytSearch = require("yt-search");
-const ytlist = require("youtube-playlist");
 const Youtube = require("simple-youtube-api");
 const youtube = new Youtube(process.env.YOUTUBE_API_KEY);
 
