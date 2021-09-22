@@ -1,8 +1,6 @@
 require("dotenv").config();
 const { MongoClient } = require("mongodb");
 const { Client, MessageEmbed } = require("discord.js");
-const ytdl = require("ytdl-core");
-const yts = require("yt-search");
 const { createApi } = require("unsplash-js");
 const nodeFetch = require("node-fetch");
 const client = new Client();
@@ -24,9 +22,9 @@ const {
   queue: queueFeature,
   skip: skipFeature,
 } = require("./music/play");
+const { tts, changeVoice } = require("./tts/index");
 const servers = [];
 
-let speaker_id = 1;
 //if the server doesn't have a set prefix yet
 // let defaultPrefix = '$kk';
 
@@ -369,63 +367,11 @@ client.on("ready", () => {
   //TEXT TO SPEAK
 
   commands(client, ["s"], async (msg) => {
-    try {
-      //join room
-      if (!msg.member.voice.channel) {
-        msg.channel.send("Vào phòng đi anh yêu");
-        return;
-      }
-      const connection = await msg.member.voice.channel.join();
-      const input = msg.content.split("!ks")[1];
-      // console.log(input);
-      const data = new URLSearchParams();
-      data.append("input", input);
-      data.append("speaker_id", Number(speaker_id));
-      data.append("speed", Number(0.8));
-      // console.log(data);
-      await fetch(process.env.ZALO_URL, {
-        method: "POST",
-        headers: {
-          apikey: process.env.ZALO_KEY,
-          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-        },
-        body: data,
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          // console.log(data);
-          if (data.error_code === 0) {
-            connection.play(data.data.url);
-          }
-        });
-    } catch (error) {
-      if (error) {
-        msg.channel.send(error);
-      }
-    }
+    tts(msg);
   });
   /// VOICE CHANGE
   commands(client, ["voice"], async (msg) => {
-    try {
-      const voicesId = [1, 2, 3, 4];
-      const input = msg.content.split("!kvoice")[1];
-      if (input.indexOf(voicesId) === -1) {
-        // console.log(speaker_id);
-        speaker_id = input;
-        let mess = new MessageEmbed();
-        mess
-          .setColor("#fa7de5")
-          .setTitle("Success")
-          .setDescription(`Đổi giọng thành công 👌 ${speaker_id}`);
-        msg.channel.send(mess);
-      } else {
-        msg.channel.send("Voice id giá trị từ `1- 4` thui bạn ei 👉👈");
-      }
-    } catch (error) {
-      if (error) {
-        msg.channel.send(error);
-      }
-    }
+    changeVoice(msg);
   });
 });
 
