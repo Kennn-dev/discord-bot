@@ -102,6 +102,7 @@ const play = async (msg) => {
           playlist.push(videoFormat);
         } catch (error) {
           console.log(error);
+          msg.channel.send(error.message);
           videos.shift();
         }
       }
