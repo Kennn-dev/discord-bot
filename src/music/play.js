@@ -149,7 +149,7 @@ const play = async (msg) => {
   } catch (err) {
     console.log(err);
     queue.delete(msg.guild.id);
-    msg.channel.send("Có gì đó sai sai rồi, check logs xem !");
+    msg.channel.send("Có gì đó sai sai rồi !").then((m) => m.edit(err.message));
   }
 };
 const clear = (msg) => {

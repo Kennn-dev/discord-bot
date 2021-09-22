@@ -65,6 +65,16 @@ const customMessageEmbed = (content, q) => {
 client.on("ready", () => {
   client.setMaxListeners(0);
   console.log(`Logged in as ${client.user.tag}!`);
+  // PING
+  commands(client, ["ping"], (msg) => {
+    msg.channel.send("Và ping là ...").then((m) => {
+      m.edit(
+        `🤖 \nPong! Ping lên đến tận : **${
+          Date.now() - msg.createdTimestamp
+        }ms** \nĐộ trễ tận :  **${Math.round(client.ws.ping)}ms**`
+      );
+    });
+  });
 
   //COMMANDS WITH DATABASE
   mongoClient.connect((err, db) => {
