@@ -82,11 +82,11 @@ const play = async (msg) => {
 
     // TODOS : Check playlist and push all to songs
     let song = null;
-    let playlist = null;
+    let playlist = [];
     const isPlaylist = query.includes("youtube.com/playlist?");
     if (isPlaylist) {
       // Search and get an array of songs
-      playlist = [];
+      // playlist = [];
       const youtubePlaylist = await youtube.getPlaylist(query);
       const videos = await youtubePlaylist.getVideos();
       msg.channel.send(`Đợi tí ... ⏲️`);
@@ -102,7 +102,7 @@ const play = async (msg) => {
           playlist.push(videoFormat);
         } catch (error) {
           console.log(error);
-          msg.channel.send(error.message);
+          // msg.channel.send(error.message);
           videos.shift();
         }
       }
@@ -137,6 +137,11 @@ const play = async (msg) => {
       videoPlayer(msg, queueValue.songs[0]);
     } else {
       // Has server queue
+      if (isPlaylist) {
+        console.log(playlist);
+        queue.get(msg.guild.id).songs.push(playlist);
+        msg.channel.send(`Vừa thêm ${playlist.length} vào quêu 🎶`);
+      }
       //  push a new song
       queue.get(msg.guild.id).songs.push(song);
       msg.channel.send(`🎹 **${song.title}** đã thêm vào quêu`);
