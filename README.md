@@ -1,3 +1,5 @@
+# Invite bot
+https://discord.com/api/oauth2/authorize?client_id=805453868913131540&permissions=3278848&scope=bot
 # Discord Bot Commands
 Text to speak API by https://zalo.ai/
 Prefix : `!k`
